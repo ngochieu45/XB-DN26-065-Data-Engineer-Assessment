@@ -6,6 +6,10 @@ Triển khai pipeline log cục bộ thành một batch workflow chạy hằng n
 
 ## Kiến trúc đề xuất
 
+![AWS pipeline architecture](AWS_pipeline.drawio.png)
+
+Sơ đồ editable nằm trong file `AWS_pipeline.drawio`.
+
 ```text
 Daily schedule
   -> EventBridge rule
@@ -70,4 +74,3 @@ Daily schedule
 | Glue Data Catalog + Athena | Cho phép khách hàng query dữ liệu trên S3 trực tiếp mà không cần database riêng. |
 | IAM roles theo least privilege | Giảm blast radius và ngăn reporting job/user sửa raw logs. |
 | CloudWatch alarms | Giúp đội vận hành thấy ngay daily run bị fail hoặc chạy trễ. |
-
