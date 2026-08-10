@@ -2,7 +2,7 @@
 
 This repository contains the working artifacts for the Xbrain Data Engineer assessment.
 
-The pipeline processes seven days of simulated application logs from five services. It validates and cleans the source records, stores a structured dataset, and generates the four reports requested by the customer.
+It includes Part A, a local data pipeline for seven days of simulated application logs, and Part B, a mini knowledge base built from eight internal operations documents.
 
 The source JSONL file is treated as immutable raw data and is never edited.
 
@@ -13,20 +13,30 @@ repo/
 |-- README.md
 |-- requirements.txt
 |-- design/
-|   |-- aws_pipeline.drawio
+|   |-- AWS_pipeline.drawio
+|   |-- AWS_pipeline.drawio.png
 |   `-- aws_pipeline_design.md
+|-- kb/
+|   |-- builder.py
+|   |-- evaluate.py
+|   |-- eval_questions.json
+|   |-- tests/
+|   `-- output/
 |-- pipeline/
 |   |-- processing.py
 |   |-- reporting.py
 |   |-- run.py
 |   |-- tests/
 |   `-- output/
+|-- sop/
+|   `-- kb_update_sop.md
 `-- Xbrain_Assessment_DE_DataPack/
     `-- data/
-        `-- app_logs_7days.jsonl
+        |-- app_logs_7days.jsonl
+        `-- docs/
 ```
 
-The AWS deployment design for running the pipeline daily is in `design/aws_pipeline_design.md`, with an editable draw.io diagram in `design/aws_pipeline.drawio`.
+The AWS deployment design for running the pipeline daily is in `design/aws_pipeline_design.md`, with an editable draw.io diagram in `design/AWS_pipeline.drawio`.
 
 The diagram uses these main components: `Logs source`, `AWS Region`, `Raw logs bucket`, `Daily schedule`, `Glue ETL job`, `Processed (parquet)`, `Rejected record prefix`, `Glue data catalog`, `Amazon Athena Daily report`, `Amazon CloudWatch`, and `AWS IAM least privilege`.
 
@@ -196,8 +206,71 @@ python -m unittest discover -s pipeline/tests -v
 
 The tests cover malformed JSON, missing fields, invalid timestamps, duplicate request IDs, timezone normalization, optional `trace_id`, stable error-type extraction, and IQR anomaly detection.
 
+## Part B - Mini knowledge base
+
+The KB is built from the eight Markdown documents under `Xbrain_Assessment_DE_DataPack/data/docs/`.
+
+Run the KB build:
+
+```powershell
+python -m kb build
+```
+
+Run a search query:
+
+```powershell
+python -m kb query "Chính sách backup hiện hành giữ bản sao lưu bao lâu?"
+```
+
+Run the eval set:
+
+```powershell
+python -m kb.evaluate
+```
+
+Run KB tests:
+
+```powershell
+python -m unittest discover -s kb/tests -v
+```
+
+### KB design decisions
+
+| Area | Decision | Reason |
+| --- | --- | --- |
+| Chunking | Structure-based chunking by Markdown heading/section | The source documents are SOPs, policies, FAQ, guides, and runbooks with clear headings. This keeps each operational procedure or policy section readable as one retrieval unit. |
+| Metadata | Store `source_file`, `doc_id`, `title`, `section`, `version`, `issued_or_updated_date`, `owner`, `is_superseded` | The reading material highlights source, version/date, and owner as important metadata for freshness and traceability. |
+| Index/search | SQLite FTS5 local full-text index | The KB is small, local, reproducible, and easy to inspect. A heavier embeddings stack is not required for this POC. |
+| Vietnamese search | Index both original text and a normalized no-accent version | This avoids missing matches when a query is typed with different Vietnamese accent handling. |
+| Multi-source retrieval | Diversify top results by source file | Some eval questions require combining evidence from multiple documents, so one repeated source should not occupy all top-k results. |
+| Conflict rule | Keep old versions for audit but mark superseded chunks | `POL-01` v2 is version 2.0, issued 05/2026, and explicitly replaces the previous version. |
+
+### KB outputs
+
+```text
+kb/output/
+|-- chunks.jsonl
+|-- kb.sqlite
+|-- build_report.md
+|-- eval_results.json
+`-- eval_results.md
+```
+
+The latest build produced:
+
+- Documents read: 8
+- Chunks created: 30
+- Superseded chunks: 3
+- Retrieval eval cases: 9/9 pass
+- Out-of-scope eval cases: 1 manual groundedness check
+
+The conflict found in the documents is `POL-01_chinh_sach_backup_v1.md` versus `POL-01_chinh_sach_backup_v2.md`. The current answer should use v2: backup at 23:30, retention 30 days, encrypted cloud storage, and restore approval from the Head of Operations.
+
+The KB update SOP is in `sop/kb_update_sop.md`.
+
 ## Assumptions and limitations
 
 - `request_id` is treated as unique because repeated IDs in the supplied data are exact duplicated events. A production pipeline should confirm this contract with the source owner.
 - The IQR anomaly rule is transparent and suitable for this POC, but seven days is a short baseline. A production detector should use more history and account for weekday or seasonal patterns.
 - The current implementation is a local batch pipeline designed for reproducibility and clear decision-making.
+- The KB implementation is retrieval-focused. It does not call an LLM to generate final answers; groundedness is checked manually against expected answer bullets and retrieved source chunks.
