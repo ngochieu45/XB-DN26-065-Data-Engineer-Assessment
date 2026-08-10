@@ -1,6 +1,6 @@
-# Xbrain Data Engineer POC - Part 1A Log Pipeline
+# Xbrain Data Engineer POC
 
-This repository currently contains the local Python pipeline for Part 1A of the Xbrain Data Engineer assessment.
+This repository contains the working artifacts for the Xbrain Data Engineer assessment.
 
 The pipeline processes seven days of simulated application logs from five services. It validates and cleans the source records, stores a structured dataset, and generates the four reports requested by the customer.
 
@@ -12,6 +12,9 @@ The source JSONL file is treated as immutable raw data and is never edited.
 repo/
 |-- README.md
 |-- requirements.txt
+|-- design/
+|   |-- aws_pipeline.drawio
+|   `-- aws_pipeline_design.md
 |-- pipeline/
 |   |-- processing.py
 |   |-- reporting.py
@@ -22,6 +25,10 @@ repo/
     `-- data/
         `-- app_logs_7days.jsonl
 ```
+
+The AWS deployment design for running the pipeline daily is in `design/aws_pipeline_design.md`, with an editable draw.io diagram in `design/aws_pipeline.drawio`.
+
+The diagram uses these main components: `Logs source`, `AWS Region`, `Raw logs bucket`, `Daily schedule`, `Glue ETL job`, `Processed (parquet)`, `Rejected record prefix`, `Glue data catalog`, `Amazon Athena Daily report`, `Amazon CloudWatch`, and `AWS IAM least privilege`.
 
 ## Requirements
 
@@ -160,7 +167,8 @@ All reports are calculated from the clean dataset rather than the raw file.
 | Most common error type | `ConnTimeout`, 114, `payment-api` | Group by normalized `error_type`, excluding dynamic parameters. |
 | Second most common error type | `HTTP 502`, 41, `web-portal` | Apply the same normalized grouping rule. |
 | Third most common error type | `NullPointer`, 37, `batch-report` | Apply the same normalized grouping rule. |
-| Removed or deduplicated records | 84 | Reconcile mutually exclusive rejection reasons against all physical lines. |
+| Rejected or deduplicated records | 84 | Reconcile mutually exclusive rejection reasons against all physical lines. |
+| Normalized accepted records | 1,674 missing optional `trace_id`; 588 timezone offsets normalized to UTC | Count normalization operations on accepted records; operations may overlap. |
 
 The complete breakdown is available in `pipeline/output/analysis_report.md`.
 
