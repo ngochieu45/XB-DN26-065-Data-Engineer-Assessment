@@ -1,0 +1,253 @@
+[
+  {
+    "expected_answer": [
+      "Sao lưu hằng ngày lúc 23:30.",
+      "Bản sao lưu được lưu giữ 30 ngày.",
+      "Không trả lời theo bản v1 là 22:00 và 7 ngày."
+    ],
+    "expected_sources": [
+      "POL-01_chinh_sach_backup_v2.md"
+    ],
+    "id": "Q01",
+    "manual_groundedness_check": "Answer states 23:30 and 30 days, cites POL-01 v2, and does not use v1 values.",
+    "question": "Chính sách backup hiện hành sao lưu lúc mấy giờ và giữ bản sao lưu trong bao lâu?",
+    "retrieval_hit": true,
+    "status": "PASS",
+    "top_sections": [
+      "Quy định",
+      "Lịch chạy",
+      "Tổng quan"
+    ],
+    "top_sources": [
+      "POL-01_chinh_sach_backup_v2.md",
+      "RUN-01_runbook_batch_report.md",
+      "POL-02_chinh_sach_truy_cap.md"
+    ],
+    "type": "version-trap"
+  },
+  {
+    "expected_answer": [
+      "Không restart service nếu database quá tải.",
+      "Kiểm tra tải database, liên hệ DBA nếu quá tải.",
+      "Nếu chỉ một service bị ảnh hưởng thì kiểm tra connection pool của service đó."
+    ],
+    "expected_sources": [
+      "FAQ-01_loi_thuong_gap.md"
+    ],
+    "id": "Q02",
+    "manual_groundedness_check": "Answer must mention the no-restart warning and the DBA/connection-pool checks.",
+    "question": "Khi gặp ERR ConnTimeout db-primary, có nên restart service ngay không?",
+    "retrieval_hit": true,
+    "status": "PASS",
+    "top_sections": [
+      "1. `ERR ConnTimeout db-primary`",
+      "Khi job lỗi (`ERR NullPointer in ReportBuilder`)",
+      "Quy trình chuẩn (theo thứ tự, KHÔNG bỏ bước)"
+    ],
+    "top_sources": [
+      "FAQ-01_loi_thuong_gap.md",
+      "RUN-01_runbook_batch_report.md",
+      "SOP-01_khoi_dong_lai_dich_vu.md"
+    ],
+    "type": "direct"
+  },
+  {
+    "expected_answer": [
+      "Không restart quá 2 lần liên tiếp.",
+      "Sau lần thứ 2 vẫn lỗi thì chuyển escalation mức 2.",
+      "P1 hoặc P2 kéo dài cần escalation theo SOP-02."
+    ],
+    "expected_sources": [
+      "SOP-02_quy_trinh_escalation.md",
+      "SOP-01_khoi_dong_lai_dich_vu.md"
+    ],
+    "id": "Q03",
+    "manual_groundedness_check": "Answer combines the restart limit from SOP-01 with escalation levels from SOP-02.",
+    "question": "Nếu payment-api lỗi nặng và restart không giải quyết được thì cần kiểm tra hoặc escalate thế nào?",
+    "retrieval_hit": true,
+    "status": "PASS",
+    "top_sections": [
+      "Trường hợp restart KHÔNG giải quyết được",
+      "Luồng escalation",
+      "Khi job lỗi (`ERR NullPointer in ReportBuilder`)"
+    ],
+    "top_sources": [
+      "SOP-01_khoi_dong_lai_dich_vu.md",
+      "SOP-02_quy_trinh_escalation.md",
+      "RUN-01_runbook_batch_report.md"
+    ],
+    "type": "multi-source"
+  },
+  {
+    "expected_answer": [
+      "Tỉ lệ ERROR / tổng log trong 15 phút CRITICAL khi lớn hơn 5%."
+    ],
+    "expected_sources": [
+      "GUIDE-01_giam_sat_he_thong.md"
+    ],
+    "id": "Q04",
+    "manual_groundedness_check": "Answer must state > 5% and cite the monitoring guide.",
+    "question": "Ngưỡng CRITICAL cho tỉ lệ ERROR trong 15 phút là bao nhiêu?",
+    "retrieval_hit": true,
+    "status": "PASS",
+    "top_sections": [
+      "Ngưỡng cảnh báo hiện hành",
+      "Phân mức sự cố",
+      "Quy trình chuẩn (theo thứ tự, KHÔNG bỏ bước)"
+    ],
+    "top_sources": [
+      "GUIDE-01_giam_sat_he_thong.md",
+      "SOP-02_quy_trinh_escalation.md",
+      "SOP-01_khoi_dong_lai_dich_vu.md"
+    ],
+    "type": "direct"
+  },
+  {
+    "expected_answer": [
+      "Job batch-report chạy 23:00 hằng ngày.",
+      "Báo cáo gửi Ban điều hành lúc 07:00 sáng hôm sau."
+    ],
+    "expected_sources": [
+      "RUN-01_runbook_batch_report.md"
+    ],
+    "id": "Q05",
+    "manual_groundedness_check": "Answer must mention both 23:00 and 07:00.",
+    "question": "Job batch-report chạy lúc mấy giờ và gửi báo cáo lúc nào?",
+    "retrieval_hit": true,
+    "status": "PASS",
+    "top_sections": [
+      "Lịch chạy",
+      "Quy định",
+      "4. `ERR NullPointer in ReportBuilder`"
+    ],
+    "top_sources": [
+      "RUN-01_runbook_batch_report.md",
+      "POL-01_chinh_sach_backup_v2.md",
+      "FAQ-01_loi_thuong_gap.md"
+    ],
+    "type": "direct"
+  },
+  {
+    "expected_answer": [
+      "Không.",
+      "Đối tác chỉ được cấp dữ liệu đã masking và làm việc trên môi trường tách biệt, không kết nối production."
+    ],
+    "expected_sources": [
+      "POL-02_chinh_sach_truy_cap.md"
+    ],
+    "id": "Q06",
+    "manual_groundedness_check": "Answer must deny direct production access and mention masked data/separate environment.",
+    "question": "Đối tác bên ngoài có được kết nối trực tiếp production database không?",
+    "retrieval_hit": true,
+    "status": "PASS",
+    "top_sections": [
+      "Với đối tác bên ngoài",
+      "1. `ERR ConnTimeout db-primary`",
+      "Dashboard chính"
+    ],
+    "top_sources": [
+      "POL-02_chinh_sach_truy_cap.md",
+      "FAQ-01_loi_thuong_gap.md",
+      "GUIDE-01_giam_sat_he_thong.md"
+    ],
+    "type": "direct"
+  },
+  {
+    "expected_answer": [
+      "Xử lý gốc ở payment-api trước, không chỉ xử lý web-portal.",
+      "Có thể theo dõi trạng thái dịch vụ, tỉ lệ lỗi và giao dịch chờ ở payment-api."
+    ],
+    "expected_sources": [
+      "FAQ-01_loi_thuong_gap.md",
+      "GUIDE-01_giam_sat_he_thong.md"
+    ],
+    "id": "Q07",
+    "manual_groundedness_check": "Answer must use FAQ-01 for root-cause direction and GUIDE-01 for monitoring signals.",
+    "question": "Khi ERR HTTP 502 upstream=payment-api xuất hiện ở web-portal, nên xử lý ở đâu và theo dõi chỉ số nào?",
+    "retrieval_hit": true,
+    "status": "PASS",
+    "top_sections": [
+      "3. `ERR HTTP 502 upstream=payment-api`",
+      "Ngưỡng cảnh báo hiện hành",
+      "Phạm vi"
+    ],
+    "top_sources": [
+      "FAQ-01_loi_thuong_gap.md",
+      "GUIDE-01_giam_sat_he_thong.md",
+      "SOP-01_khoi_dong_lai_dich_vu.md"
+    ],
+    "type": "multi-source"
+  },
+  {
+    "expected_answer": [
+      "Không chạy lại job ngay nếu dữ liệu đầu vào thiếu.",
+      "Chờ dữ liệu được bổ sung hoặc đồng bộ lại rồi mới rerun theo ngày."
+    ],
+    "expected_sources": [
+      "RUN-01_runbook_batch_report.md"
+    ],
+    "id": "Q08",
+    "manual_groundedness_check": "Answer must include the wait-before-rerun instruction.",
+    "question": "Nếu ERR NullPointer in ReportBuilder xảy ra thì có nên chạy lại job ngay khi dữ liệu đầu vào thiếu không?",
+    "retrieval_hit": true,
+    "status": "PASS",
+    "top_sections": [
+      "4. `ERR NullPointer in ReportBuilder`",
+      "Khi job lỗi (`ERR NullPointer in ReportBuilder`)",
+      "Quy trình chuẩn (theo thứ tự, KHÔNG bỏ bước)"
+    ],
+    "top_sources": [
+      "FAQ-01_loi_thuong_gap.md",
+      "RUN-01_runbook_batch_report.md",
+      "SOP-01_khoi_dong_lai_dich_vu.md"
+    ],
+    "type": "direct"
+  },
+  {
+    "expected_answer": [
+      "Không có thông tin trong tài liệu được cấp."
+    ],
+    "expected_sources": [],
+    "id": "Q09",
+    "manual_groundedness_check": "Answer must say the documents do not contain this information and must not invent HR policy.",
+    "question": "Chính sách lương thưởng của nhân viên vận hành được quy định thế nào?",
+    "retrieval_hit": null,
+    "status": "MANUAL",
+    "top_sections": [
+      "Trách nhiệm",
+      "Luồng escalation",
+      "Quy ước log"
+    ],
+    "top_sources": [
+      "POL-01_chinh_sach_backup_v2.md",
+      "SOP-02_quy_trinh_escalation.md",
+      "GUIDE-01_giam_sat_he_thong.md"
+    ],
+    "type": "out-of-scope"
+  },
+  {
+    "expected_answer": [
+      "Bắt buộc kiểm tra không còn giao dịch đang xử lý, queue = 0.",
+      "Restart khi còn giao dịch treo có thể gây lệch số dư."
+    ],
+    "expected_sources": [
+      "SOP-01_khoi_dong_lai_dich_vu.md"
+    ],
+    "id": "Q10",
+    "manual_groundedness_check": "Answer must mention queue = 0 and balance-risk warning.",
+    "question": "Khi restart payment-api, điều kiện bắt buộc trước khi restart là gì?",
+    "retrieval_hit": true,
+    "status": "PASS",
+    "top_sections": [
+      "Quy trình chuẩn (theo thứ tự, KHÔNG bỏ bước)",
+      "Khi job lỗi (`ERR NullPointer in ReportBuilder`)",
+      "Quy ước log"
+    ],
+    "top_sources": [
+      "SOP-01_khoi_dong_lai_dich_vu.md",
+      "RUN-01_runbook_batch_report.md",
+      "GUIDE-01_giam_sat_he_thong.md"
+    ],
+    "type": "direct"
+  }
+]
