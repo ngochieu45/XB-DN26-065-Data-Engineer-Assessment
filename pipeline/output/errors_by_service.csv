@@ -1,0 +1,6 @@
+rank,service,error_count
+1,payment-api,139
+2,web-portal,41
+3,batch-report,37
+4,auth-service,35
+5,notification-worker,35

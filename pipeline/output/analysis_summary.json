@@ -1,0 +1,36 @@
+{
+  "total_clean_records": 2839,
+  "total_error_records": 287,
+  "service_with_most_errors": "payment-api",
+  "highest_service_error_count": 139,
+  "high_anomaly_dates": [
+    "2026-07-30"
+  ],
+  "anomaly_method": "High outlier above Q3 + 1.5 * IQR",
+  "anomaly_threshold": {
+    "q1": 21.5,
+    "q3": 30.0,
+    "iqr": 8.5,
+    "upper_bound": 42.75
+  },
+  "top_error_types": [
+    {
+      "rank": 1,
+      "error_type": "ConnTimeout",
+      "error_count": 114,
+      "services": "payment-api (114)"
+    },
+    {
+      "rank": 2,
+      "error_type": "HTTP 502",
+      "error_count": 41,
+      "services": "web-portal (41)"
+    },
+    {
+      "rank": 3,
+      "error_type": "NullPointer",
+      "error_count": 37,
+      "services": "batch-report (37)"
+    }
+  ]
+}

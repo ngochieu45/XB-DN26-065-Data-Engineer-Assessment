@@ -1,0 +1,41 @@
+{
+  "input_file": "Xbrain_Assessment_DE_DataPack\\data\\app_logs_7days.jsonl",
+  "policy": {
+    "malformed_json": "quarantine",
+    "missing_required_field": "quarantine",
+    "invalid_timestamp": "quarantine",
+    "duplicate_request_id": "keep first valid occurrence",
+    "timestamp": "normalize valid timezone-aware values to UTC",
+    "trace_id": "optional; fill missing values with null"
+  },
+  "counts": {
+    "total_lines": 2923,
+    "parsed_json_values": 2905,
+    "clean_records": 2839,
+    "rejected_records": 84
+  },
+  "rejected_by_reason": {
+    "duplicate_request_id": 28,
+    "invalid_timestamp": 20,
+    "malformed_json": 18,
+    "missing_required_field": 18
+  },
+  "transformations": {
+    "missing_optional_trace_id_filled_null": 1674,
+    "timezone_offset_normalized_to_utc": 588
+  },
+  "schema_variants": {
+    "level|message|request_id|service|timestamp": 1698,
+    "level|message|request_id|service|timestamp|trace_id": 1189,
+    "message|request_id|service|timestamp": 8,
+    "message|request_id|service|timestamp|trace_id": 10
+  },
+  "observed_fields": {
+    "level": 2887,
+    "message": 2905,
+    "request_id": 2905,
+    "service": 2905,
+    "timestamp": 2905,
+    "trace_id": 1199
+  }
+}

@@ -1,0 +1,4 @@
+rank,error_type,error_count,services
+1,ConnTimeout,114,payment-api (114)
+2,HTTP 502,41,web-portal (41)
+3,NullPointer,37,batch-report (37)

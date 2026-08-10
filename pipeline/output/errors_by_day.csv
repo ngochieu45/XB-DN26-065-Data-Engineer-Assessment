@@ -1,0 +1,8 @@
+event_date,error_count,is_high_anomaly
+2026-07-27,19,False
+2026-07-28,27,False
+2026-07-29,29,False
+2026-07-30,140,True
+2026-07-31,17,False
+2026-08-01,24,False
+2026-08-02,31,False
