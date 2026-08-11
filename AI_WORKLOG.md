@@ -210,8 +210,7 @@ Sau khi kiểm tra, em thấy một số điểm cần chỉnh trước khi ch�
 - Athena chỉ query `Processed (parquet)` cho báo cáo chính; rejected records
   được giữ riêng để audit/data-quality review.
 - CloudWatch nên được mô tả là monitor Glue job logs/status/runtime và alert
-  khi fail/timeout, không claim quá mức nếu chưa có heartbeat kiểm tra missing
-  schedule.
+  khi fail/timeout.
 - IAM nên ghi ở mức role/least-privilege, không cần viết policy JSON chi tiết
   cho paper design.
 
