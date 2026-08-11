@@ -52,6 +52,7 @@ Category rules:
 1. ERR error:
    - Pattern `ERR HTTP <status> ...` -> event_name="HTTP <status>", error_code="HTTP <status>", http_status=<status>.
    - Pattern `ERR <error_token> ...` -> event_name=<error_token>, error_code=<error_token>; dừng trước token có `=` hoặc từ nối `in`, `after`.
+   - Pattern `after <n>s` trong error -> timeout_seconds=<n>.
    - component:
      - `upstream=<name>` -> component=<name>.
      - `ERR <error_token> <name> ...` -> component=<name>.
@@ -114,9 +115,32 @@ Prompt yêu cầu LLM hoạt động như một parser có rule, thay vì trả 
 
 Ví dụ, với `Request completed path=/report in 554ms`, prompt xác định đây là `performance`, chuẩn hóa tên thành `request_completed`, lấy `/report` vào `path`, đổi `554ms` thành `response_time_ms: 554`, và giữ nguyên message trong `message_raw` để đối chiếu.
 
-## Bộ test 5 message từ data pack và expect output
+## Bộ test 5 message từ data pack và expected output
 
-### Test 1 - error và component
+Đây là cùng một bộ message được dùng để chạy thử trên ChatGPT và Claude ở B4. Expected output là đáp án chuẩn do em xác định trước để đối chiếu kết quả của hai model.
+
+### Test 1 - error có component, timeout và retry
+
+Input: `ERR ConnTimeout db-primary after 30s retry=3`
+
+```json
+{
+  "message_raw": "ERR ConnTimeout db-primary after 30s retry=3",
+  "parse_status": "parsed",
+  "event_category": "error",
+  "event_name": "ConnTimeout",
+  "component": "db-primary",
+  "parameters": {
+    "error_code": "ConnTimeout",
+    "timeout_seconds": 30,
+    "retry_count": 3
+  },
+  "extra_parameters": {},
+  "missing_information": []
+}
+```
+
+### Test 2 - HTTP error có upstream và path
 
 Input: `ERR HTTP 502 upstream=payment-api path=/checkout`
 
@@ -137,80 +161,56 @@ Input: `ERR HTTP 502 upstream=payment-api path=/checkout`
 }
 ```
 
-### Test 2 - pattern phổ biến nhất
+### Test 3 - job hoàn thành
 
-Input: `Request completed path=/report in 554ms`
+Input: `Daily report job finished rows=1001`
 
 ```json
 {
-  "message_raw": "Request completed path=/report in 554ms",
+  "message_raw": "Daily report job finished rows=1001",
   "parse_status": "parsed",
-  "event_category": "performance",
-  "event_name": "request_completed",
+  "event_category": "job",
+  "event_name": "daily_report_finished",
   "component": null,
   "parameters": {
-    "path": "/report",
-    "response_time_ms": 554
+    "rows": 1001
   },
   "extra_parameters": {},
   "missing_information": []
 }
 ```
 
-### Test 3 - business event
+### Test 4 - notification có user ID
 
-Input: `Payment processed txn=t419149 amount=990000`
+Input: `Email sent uid=u3328`
 
 ```json
 {
-  "message_raw": "Payment processed txn=t419149 amount=990000",
+  "message_raw": "Email sent uid=u3328",
   "parse_status": "parsed",
-  "event_category": "business",
-  "event_name": "payment_processed",
+  "event_category": "notification",
+  "event_name": "email_sent",
   "component": null,
   "parameters": {
-    "txn": "t419149",
-    "amount": 990000
+    "uid": "u3328"
   },
   "extra_parameters": {},
   "missing_information": []
 }
 ```
 
-### Test 4 - ca mơ hồ giữa performance và auth
+### Test 5 - health event không có parameter
 
-Input: `Slow login 900ms uid=u7882`
-
-```json
-{
-  "message_raw": "Slow login 900ms uid=u7882",
-  "parse_status": "parsed",
-  "event_category": "performance",
-  "event_name": "slow_login",
-  "component": null,
-  "parameters": {
-    "response_time_ms": 900,
-    "uid": "u7882"
-  },
-  "extra_parameters": {},
-  "missing_information": []
-}
-```
-
-### Test 5 - operational health
-
-Input: `Queue depth high depth=2656`
+Input: `Clock sync failed`
 
 ```json
 {
-  "message_raw": "Queue depth high depth=2656",
+  "message_raw": "Clock sync failed",
   "parse_status": "parsed",
   "event_category": "health",
-  "event_name": "queue_depth_high",
+  "event_name": "clock_sync_failed",
   "component": null,
-  "parameters": {
-    "depth": 2656
-  },
+  "parameters": {},
   "extra_parameters": {},
   "missing_information": []
 }
@@ -262,7 +262,7 @@ Không chỉ kiểm tra giá trị có xuất hiện hay không mà còn phải 
 
 ## B4 - Chạy thử bằng ChatGPT và Claude
 
-Em đã chạy thử prompt trên cùng 5 message từ data pack bằng ChatGPT và Claude, sau đó đối chiếu từng field giữa hai model.
+Em đã chạy thử một phiên bản prompt trên cùng 5 message từ data pack bằng ChatGPT và Claude, sau đó đối chiếu từng field với expected output ở B2. Kết quả chạy thử dưới đây được giữ nguyên; rule `after <n>s` trong prompt hoàn chỉnh ở trên là phần em bổ sung sau khi phát hiện cả hai model bỏ sót timeout.
 
 Các message đã dùng:
 
@@ -410,7 +410,7 @@ Các message đã dùng:
 ### Nhận xét sau khi chạy thử
 
 - Hai model xử lý giống nhau ở test 2, 4 và 5.
-- Ở test 1, cả hai đều bỏ sót `timeout_seconds=30`; ChatGPT còn bỏ sót `error_code="ConnTimeout"`. Điều này cho thấy prompt chưa có rule rõ cho `after <n>s`, đồng thời model vẫn có thể bỏ qua rule đã nêu.
+- Ở test 1, cả hai đều bỏ sót `timeout_seconds=30`; ChatGPT còn bỏ sót `error_code="ConnTimeout"`. Em dùng lỗi này để bổ sung rule rõ ràng cho `after <n>s` vào prompt hoàn chỉnh. Trường hợp ChatGPT bỏ `error_code` cũng cho thấy model vẫn có thể không tuân thủ đầy đủ rule đã nêu.
 - Ở test 3, hai model trả cùng category, event name và parameters.
 - Em không coi output của model là đáp án đúng mặc định mà so sánh từng field với expected output và dùng lỗi quan sát được để chỉnh prompt.
 

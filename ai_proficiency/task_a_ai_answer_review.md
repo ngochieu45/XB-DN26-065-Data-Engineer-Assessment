@@ -1,9 +1,5 @@
 # Task A - Review câu trả lời AI
 
-Một trợ lý AI được hỏi: "Thiết kế pipeline trên AWS thu log hằng ngày từ hệ thống của khách vào data lake, và tổ chức knowledge base cho RAG." Nó trả lời như sau:
-Bạn nên lưu toàn bộ log vào S3 Standard-IA vì đây là lựa chọn mặc định rẻ nhất cho data lake. Để thu dữ liệu, cấu hình một Glue job đọc trực tiếp từ database RDS production của khách mỗi 5 phút — đây là pattern chuẩn cho near-real-time. Dữ liệu nên chuyển sang Parquet, một format lưu theo hàng (row-based) nên ghi rất nhanh, phù hợp cho analytics. Với các bước transform nặng chạy khoảng 30–45 phút, dùng AWS Lambda là phù hợp nhất vì không phải quản lý server. Về knowledge base cho RAG, hãy chia tài liệu thành các chunk cố định 4.000 token — kích thước này luôn tốt nhất cho mọi loại tài liệu. Cuối cùng, không cần đánh version cho knowledge base, vì bản mới nhất luôn là bản đúng — cứ ghi đè là được.
-
-
 ## 1. "S3 Standard-IA là lựa chọn mặc định rẻ nhất cho data lake"
 
 **Sai:** Standard-IA được thiết kế cho dữ liệu ít truy cập, có minimum storage duration 30 ngày, minimum billable object size 128 KB và chi phí truy xuất riêng. Vì vậy không thể kết luận Standard-IA luôn là lựa chọn rẻ nhất cho data lake, đặc biệt với raw logs mới ingest còn cần đọc lại để ETL, audit hoặc replay.

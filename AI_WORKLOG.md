@@ -462,3 +462,51 @@ Em đối chiếu README với output thật:
 - `sop/kb_update_sop.md`: tồn tại và đúng phạm vi SOP cập nhật KB.
 
 Em chỉ giữ các claim khớp với file output thật và sửa tên diagram trong README thành `design/AWS_pipeline.drawio` để khớp file hiện có.
+
+---
+
+## Bài 2 - Task A: Review câu trả lời AI
+
+### Việc
+
+Review sáu nhận định kỹ thuật sai hoặc gây hiểu nhầm về AWS, data pipeline và knowledge base. Bài review cần chỉ ra vấn đề, đề xuất cách sửa dễ trình bày và dẫn nguồn kiểm chứng phù hợp.
+
+### Phần em tự quyết định trước khi dùng AI
+
+Từ kiến thức đã học trong chương trình XBrain và các tài liệu `reading/` được cung cấp cùng đề, em tự chỉ ra sáu nhận định có dấu hiệu sai hoặc gây hiểu nhầm. Em cũng tự đề xuất hướng sửa ban đầu và quyết định trình bày từng nhận định theo ba mục `Sai`, `Sửa` và `Nguồn`. Sau đó em mới dùng AI để phản biện kết luận của mình và tìm tài liệu chính thống của AWS nhằm xác nhận các thông tin liên quan đến dịch vụ AWS.
+
+### Prompt
+
+> Dựa trên quá trình học tại XBrain và tài liệu `reading/` được cung cấp trong đề, tôi đã xác định sáu nhận định sau là sai hoặc gây hiểu nhầm: S3 Standard-IA luôn là lựa chọn mặc định rẻ nhất; Glue đọc RDS production mỗi 5 phút là pattern chuẩn; Parquet là row-based; Lambda phù hợp với transform 30-45 phút; chunk cố định 4.000 token luôn tốt nhất; và KB không cần version vì có thể ghi đè bằng bản mới nhất. Hãy phản biện từng kết luận của tôi, không mặc định rằng tôi đúng. Với các nhận định về AWS, hãy xác nhận bằng AWS documentation chính thống và chỉ rõ nguồn nào hỗ trợ kết luận. Với chunking và versioning, hãy đối chiếu thêm tài liệu `reading/` của đề. Trình bày kết quả theo format `Sai`, `Sửa`, `Nguồn`; không dùng `data/docs/` làm căn cứ.
+
+### Output và đánh giá
+
+AI xác nhận phần lớn các lỗi em đã chỉ ra và cung cấp tài liệu AWS chính thống về S3 storage class, Glue, Parquet/Athena, giới hạn thời gian chạy của Lambda và các chiến lược chunking của Amazon Bedrock. AI đồng thời giúp diễn đạt lại hướng sửa theo workload và trade-off. Tuy nhiên, ở nhận định về Glue đọc RDS, nguồn AI đưa ra ban đầu chỉ chứng minh Glue có thể kết nối JDBC hoặc được lập lịch, chưa chứng minh đây là một pattern chuẩn cho near-real-time. Vì vậy em không chấp nhận kết luận đó chỉ dựa trên câu trả lời của AI.
+
+### Verify và sửa
+
+Em mở từng liên kết AWS mà AI cung cấp để kiểm tra tài liệu có thực sự hỗ trợ kết luận hay không, đồng thời đối chiếu lại các nhận định về chunking và versioning với tài liệu của đề. Với nhận định Glue đọc RDS, em loại bỏ nguồn không đủ liên quan và giữ kết luận của mình: use case log hằng ngày phù hợp với S3 raw và Glue chạy daily batch; nếu cần near-real-time thì phải đánh giá riêng nguồn dữ liệu, tải lên production và phương án CDC hoặc streaming. Em cũng sửa các từ tuyệt đối như “rẻ nhất”, “pattern chuẩn” và “luôn tốt nhất” thành quyết định có điều kiện theo access pattern và workload. Quyết định cuối cùng thuộc về em; AI chỉ hỗ trợ phản biện, xác nhận nguồn và biên tập. Kết quả được lưu tại `ai_proficiency/task_a_ai_answer_review.md`.
+
+---
+
+## Bài 2 - Task B: Thiết kế và đánh giá prompt trích xuất log
+
+### Việc
+
+Thiết kế prompt chuyển `message` trong log thành JSON có cấu trúc, tạo năm test case kèm expected output và mô tả cách đánh giá độ chính xác, hallucination và trường hợp cần người kiểm tra.
+
+### Phần em tự quyết định trước khi dùng AI
+
+Em quyết định không chấp nhận prompt chỉ dựa trên vài ví dụ riêng lẻ. Prompt cuối phải có schema cố định, pattern tổng quát, thứ tự ưu tiên khi nhiều rule cùng khớp, quy tắc kiểu dữ liệu, `extra_parameters` để giữ key mới và cách xử lý input hỏng. Sau khi thử trên ChatGPT và Claude, em quyết định bỏ `confidence` vì hai model có thể gán điểm khác nhau nhưng prompt không có cơ sở hiệu chỉnh để chứng minh điểm đó phản ánh độ chính xác.
+
+### Prompt
+
+> Tôi cần hoàn thành Task B: thiết kế prompt trích xuất log thành JSON, đưa ra năm input/output mẫu và kế hoạch đánh giá. Tôi đang nghiêng về schema cố định và rule theo pattern tổng quát thay vì lookup theo ví dụ. Hãy phản biện thiết kế này dựa trên các message thật trong `app_logs_7days.jsonl`: kiểm tra độ bao phủ category, ranh giới `event_name`, precedence, key mapping, kiểu dữ liệu, tiêu chí `parsed`/`partial`, input JSON hỏng và nguy cơ bịa dữ liệu. Sau đó đề xuất cách đánh giá theo từng field, exact match, schema validity, confusion matrix, provenance check, test đối nghịch và human review. Mọi đề xuất phải chỉ rõ cách em có thể kiểm chứng bằng dữ liệu, test case hoặc tài liệu tham khảo.
+
+### Output và đánh giá
+
+AI tạo bản prompt ban đầu nhưng các category rule còn giống danh sách ví dụ và bỏ sót nhiều pattern thật, gồm `Request completed`, `Payment processed`, `Balance check ok`, `Slow login` và `Queue depth high`. Em đối chiếu các message shape trong data pack và chỉ ra nhóm chưa được bao phủ chiếm tỷ lệ đáng kể, nên không dùng nguyên bản trả lời đó. Phần đánh giá B3 ban đầu cũng còn mơ hồ; em yêu cầu viết lại thành các phép kiểm tra có đầu vào, cách tính và điều kiện đưa bản ghi cho người review.
+
+### Verify và sửa
+
+Em sửa prompt để các ví dụ chỉ minh họa cho pattern tổng quát, thêm precedence và rule rõ ràng cho các shape bị thiếu. Năm message trong bộ test cuối được đối chiếu với file log thật; các expected output được parse lại để bảo đảm là JSON hợp lệ và đúng kiểu dữ liệu. Em dùng kết quả chạy thử trên cả ChatGPT và Claude như một kiểm tra chéo: hai model cho kết quả khác nhau với `ConnTimeout`, và cả hai đều bỏ sót thời gian `30s`, cho thấy cần golden set và kiểm tra theo từng field thay vì chỉ nhìn JSON có vẻ hợp lý. Em giữ `message_raw`, dùng provenance/type-cast check để phát hiện giá trị không có căn cứ, review toàn bộ `partial`/`unknown` và chạy regression test khi prompt thay đổi. Kết quả cuối được lưu tại `ai_proficiency/task_b_message_extraction_prompt.md`; các nguồn phương pháp đánh giá được ghi trực tiếp trong file này.
