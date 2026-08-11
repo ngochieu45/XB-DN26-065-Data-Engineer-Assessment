@@ -11,7 +11,11 @@ The source JSONL file is treated as immutable raw data and is never edited.
 ```text
 repo/
 |-- README.md
+|-- AI_WORKLOG.md
 |-- requirements.txt
+|-- ai_proficiency/
+|   |-- task_a_ai_answer_review.md
+|   `-- task_b_message_extraction_prompt.md
 |-- design/
 |   |-- AWS_pipeline.drawio
 |   |-- AWS_pipeline.drawio.png
@@ -35,6 +39,14 @@ repo/
         |-- app_logs_7days.jsonl
         `-- docs/
 ```
+
+## AI proficiency artifacts
+
+The AI proficiency assessment is included in the same repository:
+
+- `AI_WORKLOG.md`: 13 significant AI-use entries documenting the task, prompt, output assessment, verification, and corrections.
+- `ai_proficiency/task_a_ai_answer_review.md`: a sourced review of six incorrect or misleading claims about AWS and knowledge-base design.
+- `ai_proficiency/task_b_message_extraction_prompt.md`: a structured log-message extraction prompt with five test cases, expected JSON outputs, an evaluation method, and cross-model trial results.
 
 The AWS deployment design for running the pipeline daily is in `design/aws_pipeline_design.md`, with an editable draw.io diagram in `design/AWS_pipeline.drawio`.
 
